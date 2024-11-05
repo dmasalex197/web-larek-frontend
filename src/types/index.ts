@@ -9,25 +9,41 @@ export interface ICard {
 }
 
 // Способ оплаты
-type Payment = 'онлайн'| 'при получении';
+type Payment = 'онлайн' | 'при получении';
 
 // Интерфейс заказа
-export interface IOrder {
-	payment: Payment;
+export interface IOrderForm {
+	payment: string;
 	email: string;
-	phone: number;
-	adress: string;
-	total: number;
+	phone: string;
+	address: string;
+	total: string | number;
+}
+
+export interface IOrder extends IOrderForm {
+	items: string[];
 }
 
 type EventName = string | RegExp;
-type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
+
+export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 
 // Интерфейс Api
 export interface IApi {
 	baseUrl: string;
 	get<T>(uri: string): Promise<T>;
 	post<T>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
+}
+
+// Интерфейс получения списка карточек и отправки заказа на сервер
+export interface ICardApi {
+	getCardList: () => Promise<ICard[]>;
+	orderCards: (order: IOrder) => Promise<IOrderResult>;
+}
+
+export interface IGetCardsResponse {
+	total: number;
+	items: ICard[];
 }
 
 // Интерфейс брокера событий
@@ -45,20 +61,27 @@ export interface IOrderResult {
 	id: string;
 }
 
-// Интерфейс получения списка карточек и отправки заказа на сервер
-export interface ICardApi {
-	getCardList: () => Promise<ICard[]>;
-	orderCards: (order: IOrder) => Promise<IOrderResult>;
-}
-
 // Интерфейс всего приложения, описывает данные cтраницы
 export interface IAppState {
 	catalog: ICard[];
-	basket: string[];
 	preview: string | null;
+	basket: string[];
 	order: IOrder;
 	total: string | number;
 	loading: boolean;
+	setCatalog(catalog: ICard[]): void;
+	setPreview(card: TPreviewCard): void;
+	getPreviewButton(card: ICard): void;
+	addCardToBusket(card: TBasketCard): void;
+	removeCardFromBusket(card: TBasketCard): void;
+	clearBasket(): void;
+	clearOrder(): void;
+	getTotal(): number;
+	updateOrder(): void;
+	setOrderField(field: keyof IOrderForm, value: string): void;
+	setContactsField(field: keyof IOrderForm, value: string): void;
+	validateOrder(): boolean;
+	validateContacts(): boolean;
 }
 
 // Интерфейс Страницы
@@ -79,7 +102,6 @@ export interface ICardView {
 }
 
 // Интерфейс отображения товара в корзине
-
 export interface ICardBasketView {
 	title: string;
 	price: number;
@@ -107,3 +129,23 @@ interface IForm {
 interface ISuccess {
 	total: number;
 }
+
+// Тип данных, находящихся в корзине
+export type TBasketCard = Pick<ICard, 'title' | 'price' | 'id'>;
+
+// Тип данных, при просмотре продукта
+export type TPreviewCard = Pick<
+	ICard,
+	'title' | 'image' | 'description' | 'price' | 'id'
+>;
+
+// Тип формы оплаты
+export type TPaymentForm = Pick<IOrder, 'payment' | 'address'>;
+
+// Тип формы контактов
+export type TContactsForm = Pick<IOrder, 'email' | 'phone'>;
+
+// Тип ошибки заказа
+export type FormErrors = Partial<Record<keyof IOrder, string>>;
+
+export type TCardApi = Pick<ICard, 'id'>;

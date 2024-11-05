@@ -52,18 +52,18 @@ yarn build
 ## Классы, типы и интерфейсы
 
 ### Интерфейс карточки товара
-```
+```ts
 interface ICard {
 	id: string;
 	description: string;
 	image: string;
-    title: string;
-    category: string;
+  title: string;
+  category: string;
 	price: number | null;
 }
 ```
 ### Интерфейс заказа
-```
+```ts
 interface IOrder {
     payment: Payment;
     email: string;
@@ -73,7 +73,7 @@ interface IOrder {
 }
 ```
 ### Интерфейс Api
-```
+```ts
 interface IApi {
 	baseUrl: string;
 	get<T>(uri: string): Promise<T>;
@@ -81,7 +81,7 @@ interface IApi {
 }
 ```
 ### Интерфейс брокера событий
-```
+```ts
 interface IEvents {
 	on<T extends object>(event: EventName, callback: (data: T) => void): void;
 	emit<T extends object>(event: string, data?: T): void;
@@ -92,20 +92,20 @@ interface IEvents {
 }
 ```
 ### Интерфейс ответа сервера заказа
-```
+```ts
 interface IOrderResult {
   id: string;
 }
 ```
 ### Интерфейс получения списка карточек и отправки заказа на сервер
-```
+```ts
 interface ICardApi {
   getCardList: () => Promise<ICard[]>;
   orderCards: (order: IOrder) => Promise<IOrderResult>;
 }
 ```
 ### Интерфейс всего приложения, описывает данные cтраницы
-```
+```ts
 interface IAppState {
   catalog: ICard[];
   basket: string[];
@@ -116,7 +116,7 @@ interface IAppState {
 }
 ```
 ### Интерфейс Страницы
-```
+```ts
 interface IPage {
   counter: number;
   catalog: number;
@@ -124,7 +124,7 @@ interface IPage {
 }
 ```
 ### Интерфейс Карточки товара
-```
+```ts
 interface ICardView {
   id: string;
   title: string;
@@ -135,7 +135,7 @@ interface ICardView {
 }
 ```
 ### Интерфейс отображения товара в корзине
-```
+```ts
 interface ICardBasketView {
   title: string;
   price: number;
@@ -143,32 +143,65 @@ interface ICardBasketView {
 }
 ```
 ### Интерфейс отображения корзины
-
-```
+```ts
 interface IBasketView {
   list: HTMLElement[];
   total: number;
 }
 ```
 ### Интерфейс модального окна
-```
+```ts
 interface IModalData {
   content: HTMLElement;
 }
 ```
 ### Интерфейс класса Form
-```
+```ts
 interface IForm {
   errors: string[];
   valid: boolean;
 }
 ```
 ### Интерфейс ответа успешного заказа
-```
+```ts
 interface ISuccess {
   total: number;
 }
 ```
+
+### Тип данных, находящихся в корзине
+```ts
+type TBasketItem = Pick<ICard, 'title' | 'price' | 'id'>;
+```
+
+### Тип данных, при просмотре продукта
+```ts
+type TPreviewItem = Pick<ICard, 'title' | 'image' | 'description' | 'price' | 'id'>;
+```
+
+### Тип формы оплаты
+```ts
+type TPaymentForm = Pick<IOrder, 'payment' | 'address'>;
+```
+
+### Тип формы контактов
+```ts
+type TContactsForm = Pick<IOrder, 'email' | 'phone'>;
+```
+
+### Тип ошибки заказа
+```ts
+type FormErrors = Partial<Record<keyof IOrder, string>>;
+```
+### Массив карточек товаров
+```ts
+interface ICardsData = {
+  cards: ICard[];
+  preview: string | null;
+}
+```
+
+
 ## Архитектура приложения
 Код приложения разделен на слои согласно парадигме MVP.
 - слой представления, отвечает за отображение данных на странице;
@@ -210,7 +243,7 @@ interface ISuccess {
 
 ### Класс `CardApi`
 
-Класс для получения спискеа товаров и отправки данных заказа. Наследуюется от базового класса `Api` (интерфейс `ICardApi`). Поля класса:
+Класс для получения списка товаров и отправки данных заказа. Наследуется от базового класса `Api` (интерфейс `ICardApi`). Поля класса:
 
 - url - хранит входящий url
 
@@ -249,6 +282,8 @@ interface ISuccess {
 - updateOrder - обновить данные заказа
 - setOrderField - устанавливает данные в форму заказа
 - setContactsField - устанавливает данные в форму контактов
+- validateOrder - провести валидацию формы заказа
+- validateContacts - провести валидацию формы контактов
 
 ## Слой представления
 
@@ -465,10 +500,10 @@ interface ISuccess {
 
 Методы:
 
-- setTotal - установка полной стоимости
+- `setTotal` - установка полной стоимости
 
 ## Взаимодействие компонентов (Presenter)
-Код, описывающий взаимодействие представления и данных между собой находится в файле index.ts, выполняющем роль презентера.  Взаимодействие осуществляется за счет событий генерируемых с помощью брокера событий и обработчиков событий, описанных в index.ts.  В index.ts сначала создаются экземпляры событий, генерируемых с помощью брокера событий и обработчиков этих событий, описанных в index.ts  
+Код, описывающий взаимодействие представления и данных между собой находится в файле index.ts, выполняющем роль презентера. Взаимодействие осуществляется за счет событий генерируемых с помощью брокера событий и обработчиков событий, описанных в index.ts.  В index.ts сначала создаются экземпляры событий, генерируемых с помощью брокера событий и обработчиков этих событий, описанных в index.ts  
 
 Список всех событий, генерируемых в системе:
 
