@@ -1,7 +1,7 @@
 import {
 	FormErrors,
 	IAppState,
-	ICard,
+	ICardView,
 	IOrder,
 	IOrderForm,
 	TBasketCard,
@@ -11,7 +11,7 @@ import {
 import { Model } from './base/Model';
 
 export class AppState extends Model<IAppState> {
-	catalog: ICard[];
+	catalog: ICardView[];
 	preview: string;
 	basket: TBasketCard[] = [];
 	order: IOrder = {
@@ -25,17 +25,17 @@ export class AppState extends Model<IAppState> {
 
 	protected formErrors: FormErrors = {};
 
-	setCatalog(catalog: ICard[]) {
+	setCatalog(catalog: ICardView[]) {
 		this.catalog = catalog;
-		this.emitChanges('catalog:changed');
+		this.emitChanges('catalog:changed', { catalog: this.catalog });
 	}
 
 	setPreview(card: TPreviewCard) {
 		this.preview = card.id;
-		this.emitChanges('preview:changed');
+		this.emitChanges('preview:changed', card);
 	}
 
-	getPreviewButton(card: ICard) {
+	getPreviewButton(card: ICardView) {
 		if (card.price === null) {
 			return 'unavailable';
 		} else return 'addToBasket';
@@ -94,7 +94,7 @@ export class AppState extends Model<IAppState> {
 			errors.address = 'Необходимо указать адрес';
 		}
 		this.formErrors = errors;
-		this.events.emit('formErrors:change');
+		this.events.emit('formErrors:change', this.formErrors);
 		return Object.keys(errors).length === 0;
 	}
 
@@ -116,7 +116,7 @@ export class AppState extends Model<IAppState> {
 		}
 
 		this.formErrors = errors;
-		this.events.emit('formErrors:change');
+		this.events.emit('formErrors:change', this.formErrors);
 		return Object.keys(errors).length === 0;
 	}
 }

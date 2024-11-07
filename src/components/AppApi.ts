@@ -1,4 +1,4 @@
-import { ICard, IApi } from '../types';
+import { ICardView, IApi } from '../types';
 
 export class AppApi {
 	private _baseApi: IApi;
@@ -7,9 +7,9 @@ export class AppApi {
 		this._baseApi = baseApi;
 	}
 
-	getCards(): Promise<ICard[]> {
+	getCards(): Promise<ICardView[]> {
 		return this._baseApi
-			.get<ICard[]>(`/product/`)
-			.then((cards: ICard[]) => cards);
+			.get<ICardView[]>(`/product/`)
+			.then((cards: ICardView[]) => cards);
 	}
 }

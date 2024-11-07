@@ -1,5 +1,5 @@
 // Интерфейс карточки товара
-export interface ICard {
+export interface ICardView {
 	id: string;
 	description: string;
 	image: string;
@@ -37,13 +37,13 @@ export interface IApi {
 
 // Интерфейс получения списка карточек и отправки заказа на сервер
 export interface ICardApi {
-	getCardList: () => Promise<ICard[]>;
+	getCardList: () => Promise<ICardView[]>;
 	orderCards: (order: IOrder) => Promise<IOrderResult>;
 }
 
 export interface IGetCardsResponse {
 	total: number;
-	items: ICard[];
+	items: ICardView[];
 }
 
 // Интерфейс брокера событий
@@ -63,15 +63,15 @@ export interface IOrderResult {
 
 // Интерфейс всего приложения, описывает данные cтраницы
 export interface IAppState {
-	catalog: ICard[];
+	catalog: ICardView[];
 	preview: string | null;
 	basket: string[];
 	order: IOrder;
 	total: string | number;
 	loading: boolean;
-	setCatalog(catalog: ICard[]): void;
+	setCatalog(catalog: ICardView[]): void;
 	setPreview(card: TPreviewCard): void;
-	getPreviewButton(card: ICard): void;
+	getPreviewButton(card: ICardView): void;
 	addCardToBusket(card: TBasketCard): void;
 	removeCardFromBusket(card: TBasketCard): void;
 	clearBasket(): void;
@@ -92,14 +92,14 @@ export interface IPage {
 }
 
 // Интерфейс Карточки товара
-export interface ICardView {
-	id: string;
-	title: string;
-	category: string;
-	image: string;
-	price: number;
-	text: string;
-}
+// export interface ICardView {
+// 	id: string;
+// 	title: string;
+// 	category: string;
+// 	image: string;
+// 	price: number;
+// 	text: string;
+// }
 
 // Интерфейс отображения товара в корзине
 export interface ICardBasketView {
@@ -120,22 +120,22 @@ export interface IModalData {
 }
 
 // Интерфейс класса Form
-interface IForm {
+export interface IForm {
 	errors: string[];
 	valid: boolean;
 }
 
 // Интерфейс ответа успешного заказа
-interface ISuccess {
+export interface ISuccess {
 	total: number;
 }
 
 // Тип данных, находящихся в корзине
-export type TBasketCard = Pick<ICard, 'title' | 'price' | 'id'>;
+export type TBasketCard = Pick<ICardView, 'title' | 'price' | 'id'>;
 
 // Тип данных, при просмотре продукта
 export type TPreviewCard = Pick<
-	ICard,
+	ICardView,
 	'title' | 'image' | 'description' | 'price' | 'id'
 >;
 
@@ -148,4 +148,27 @@ export type TContactsForm = Pick<IOrder, 'email' | 'phone'>;
 // Тип ошибки заказа
 export type FormErrors = Partial<Record<keyof IOrder, string>>;
 
-export type TCardApi = Pick<ICard, 'id'>;
+export type TCardApi = Pick<ICardView, 'id'>;
+
+export type TCategory =
+	| 'софт-скил'
+	| 'другое'
+	| 'дополнительное'
+	| 'кнопка'
+	| 'хард-скил';
+
+export interface ICardActions {
+	onClick: (event: MouseEvent) => void;
+}
+
+export enum Categories {
+	'софт-скил' = 'card__category_soft',
+	'другое' = 'card__category_other',
+	'дополнительное' = 'card__category_additional',
+	'кнопка' = 'card__category_button',
+	'хард-скил' = 'card__category_hard',
+}
+
+export interface ISuccessActions {
+	onClick: () => void;
+}
