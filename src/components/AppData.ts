@@ -1,7 +1,7 @@
 import {
 	FormErrors,
 	IAppState,
-	ICardView,
+	ICard,
 	IOrder,
 	IOrderForm,
 	TBasketCard,
@@ -11,7 +11,7 @@ import {
 import { Model } from './base/Model';
 
 export class AppState extends Model<IAppState> {
-	catalog: ICardView[];
+	catalog: ICard[];
 	preview: string;
 	basket: TBasketCard[] = [];
 	order: IOrder = {
@@ -25,7 +25,7 @@ export class AppState extends Model<IAppState> {
 
 	protected formErrors: FormErrors = {};
 
-	setCatalog(catalog: ICardView[]) {
+	setCatalog(catalog: ICard[]) {
 		this.catalog = catalog;
 		this.emitChanges('catalog:changed', { catalog: this.catalog });
 	}
@@ -35,7 +35,7 @@ export class AppState extends Model<IAppState> {
 		this.emitChanges('preview:changed', card);
 	}
 
-	getPreviewButton(card: ICardView) {
+	getPreviewButton(card: ICard) {
 		if (card.price === null) {
 			return 'unavailable';
 		} else return 'addToBasket';

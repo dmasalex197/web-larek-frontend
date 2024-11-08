@@ -6,6 +6,16 @@ export interface ICardView {
 	title: string;
 	category: string;
 	price: number | null;
+	button?: string;
+}
+
+export interface ICard {
+	id: string;
+	title: string;
+	description: string;
+	category: string;
+	image: string;
+	price: number | null;
 }
 
 // Способ оплаты
@@ -43,7 +53,7 @@ export interface ICardApi {
 
 export interface IGetCardsResponse {
 	total: number;
-	items: ICardView[];
+	items: ICard[];
 }
 
 // Интерфейс брокера событий
@@ -59,6 +69,11 @@ export interface IEvents {
 // Интерфейс ответа сервера заказа
 export interface IOrderResult {
 	id: string;
+}
+
+export interface IAppAPI {
+	getCards: () => Promise<ICard[]>;
+	orderProducts: (order: IOrder) => Promise<IOrderResult>;
 }
 
 // Интерфейс всего приложения, описывает данные cтраницы
@@ -91,15 +106,6 @@ export interface IPage {
 	locked: boolean;
 }
 
-// Интерфейс Карточки товара
-// export interface ICardView {
-// 	id: string;
-// 	title: string;
-// 	category: string;
-// 	image: string;
-// 	price: number;
-// 	text: string;
-// }
 
 // Интерфейс отображения товара в корзине
 export interface ICardBasketView {

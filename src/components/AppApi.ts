@@ -1,15 +1,31 @@
-import { ICardView, IApi } from '../types';
+import {
+	ICard,
+	IOrder,
+	IOrderResult,
+	IGetCardsResponse,
+	IAppAPI,
+} from '../types';
+import { Api } from './base/api';
 
-export class AppApi {
-	private _baseApi: IApi;
+export class AppApi extends Api implements IAppAPI {
+	readonly cdn: string;
 
-	constructor(baseApi: IApi) {
-		this._baseApi = baseApi;
+	constructor(baseUrl: string, cdn: string, options?: RequestInit) {
+		super(baseUrl, options);
+
+		this.cdn = cdn;
 	}
 
-	getCards(): Promise<ICardView[]> {
-		return this._baseApi
-			.get<ICardView[]>(`/product/`)
-			.then((cards: ICardView[]) => cards);
+	getCards(): Promise<ICard[]> {
+		return this.get('/product').then((data: IGetCardsResponse) =>
+			data.items.map((item) => ({
+				...item,
+				image: this.cdn + item.image,
+			}))
+		);
+	}
+
+	orderProducts(order: IOrder): Promise<IOrderResult> {
+		return this.post('/order', order).then((data: IOrderResult) => data);
 	}
 }
