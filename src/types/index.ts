@@ -18,9 +18,6 @@ export interface ICard {
 	price: number | null;
 }
 
-// Способ оплаты
-type Payment = 'онлайн' | 'при получении';
-
 // Интерфейс заказа
 export interface IOrderForm {
 	payment: string;
@@ -105,7 +102,6 @@ export interface IPage {
 	catalog: number;
 	locked: boolean;
 }
-
 
 // Интерфейс отображения товара в корзине
 export interface ICardBasketView {

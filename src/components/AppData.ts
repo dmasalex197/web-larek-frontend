@@ -45,7 +45,7 @@ export class AppState extends Model<IAppState> {
 		this.basket.push(card);
 	}
 
-	removeCardFromBusket(card: TBasketCard) {
+	removeCardFromBasket(card: TBasketCard) {
 		const index = this.basket.indexOf(card);
 		if (index >= 0) {
 			this.basket.splice(index, 1);
