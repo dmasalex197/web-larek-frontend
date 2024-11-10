@@ -1,8 +1,8 @@
 import { ICardActions } from '../types';
 import { ensureElement } from '../utils/utils';
-import { CardView } from './CardView';
+import { CardViewNew } from './CardViewNew';
 
-export class CardPreview extends CardView {
+export class CardPreview extends CardViewNew {
 	protected _text: HTMLElement;
 	protected _button: HTMLButtonElement;
 
@@ -26,7 +26,10 @@ export class CardPreview extends CardView {
 	set button(value: string) {
 		if (value === `unavailable`) {
 			this.setText(this._button, 'Невозможно приобрести');
-			this._button.disabled = true;
+			this.setDisabled(this._button, true);
+		} else if (value === 'notAddToBasket') {
+			this.setText(this._button, 'Товар в корзине');
+			this.setDisabled(this._button, true);
 		} else {
 			this.setText(this._button, 'Добавить в корзину');
 		}

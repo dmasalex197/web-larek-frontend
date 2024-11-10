@@ -1,6 +1,5 @@
-import {
+import IOrder, {
 	ICard,
-	IOrder,
 	IOrderResult,
 	IGetCardsResponse,
 	IAppAPI,

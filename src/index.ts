@@ -2,16 +2,16 @@ import { AppApi } from './components/AppApi';
 import { AppState } from './components/AppData';
 import { EventEmitter } from './components/base/events';
 import { Basket } from './components/Basket';
-import { CardBasketView } from './components/CardBasket';
+
 import { CardPreview } from './components/CardPreview';
-import { CardView } from './components/CardView';
-import { Сontacts } from './components/Contacts';
+import { CardViewNew } from './components/CardViewNew';
+import { Contacts } from './components/Contacts';
 import { Modal } from './components/Modal';
 import { Order } from './components/Order';
 import { Page } from './components/Page';
 import { Success } from './components/Success';
 import './scss/styles.scss';
-import { ICard, ICardView, IEvents, IOrderForm } from './types';
+import IOrder, { ICard, ICardView, IEvents } from './types';
 import { API_URL, CDN_URL } from './utils/constants';
 import { cloneTemplate, ensureElement } from './utils/utils';
 
@@ -30,11 +30,16 @@ const page = new Page(document.body, events);
 const app = new AppState({}, events);
 const basket = new Basket(cloneTemplate(basketTemplate), events);
 const order = new Order(cloneTemplate(orderTemplate), events);
-const contacts = new Сontacts(cloneTemplate(contactsTemplate), events);
+const contacts = new Contacts(cloneTemplate(contactsTemplate), events);
+const success = new Success(cloneTemplate(successTemplate), {
+	onClick: () => {
+		modal.close();
+	},
+});
 
 events.on('catalog:changed', () => {
 	page.catalog = app.catalog.map((item) => {
-		const card = new CardView(cloneTemplate(cardCatalogTemplate), {
+		const card = new CardViewNew(cloneTemplate(cardCatalogTemplate), {
 			onClick: () => events.emit('card:select', item),
 		});
 		return card.render({
@@ -55,6 +60,16 @@ events.on('preview:changed', (item: ICardView) => {
 		onClick: () => events.emit('card:addToBasket', item),
 	});
 
+	let buttonInfo: undefined | string;
+
+	if (app.cardInBasket(item)) {
+		buttonInfo = 'notAddToBasket';
+	} else if (item.price === null) {
+		buttonInfo = 'unavailable';
+	} else {
+		buttonInfo = 'addToBasket';
+	}
+
 	modal.render({
 		content: card.render({
 			title: item.title,
@@ -62,23 +77,28 @@ events.on('preview:changed', (item: ICardView) => {
 			description: item.description,
 			price: item.price,
 			category: item.category,
-			button: app.getPreviewButton(item),
+			button: buttonInfo,
 		}),
 	});
 });
 
 events.on('card:addToBasket', (item: ICard) => {
 	app.addCardToBasket(item);
-	app.updateOrder();
 	page.counter = app.basket.length;
 	modal.close();
 });
 
+events.on('basket:changed', () => {
+	page.counter = app.basket.length;
+	basket.render({
+		total: app.getTotal(),
+	});
+});
+
 events.on('basket:open', () => {
-	basket.total = app.getTotal();
 	let indexCard = 1;
 	basket.list = app.basket.map((item) => {
-		const basketCard = new CardBasketView(cloneTemplate(cardBasketTemplate), {
+		const basketCard = new CardViewNew(cloneTemplate(cardBasketTemplate), {
 			onClick: () => events.emit('card:removeFromBasket', item),
 		});
 		return basketCard.render({
@@ -94,12 +114,11 @@ events.on('basket:open', () => {
 
 events.on('card:removeFromBasket', (item: ICard) => {
 	app.removeCardFromBasket(item);
-	app.updateOrder();
 	page.counter = app.basket.length;
 	basket.total = app.getTotal();
 	let indexCard = 1;
 	basket.list = app.basket.map((item) => {
-		const card = new CardBasketView(cloneTemplate(cardBasketTemplate), {
+		const card = new CardViewNew(cloneTemplate(cardBasketTemplate), {
 			onClick: () => events.emit('card:removeFromBasket', item),
 		});
 		return card.render({
@@ -108,16 +127,24 @@ events.on('card:removeFromBasket', (item: ICard) => {
 			index: indexCard++,
 		});
 	});
-	modal.render({
-		content: basket.render(),
+});
+
+events.on('order:changed', () => {
+	order.render({
+		payment: '',
+		address: '',
+		valid: false,
+		errors: [],
 	});
 });
 
 events.on('order:open', () => {
+	const orderData = app.order;
+	app.clearAddressAndPayment();
 	modal.render({
 		content: order.render({
-			payment: '',
-			address: '',
+			payment: orderData.payment,
+			address: orderData.address,
 			valid: false,
 			errors: [],
 		}),
@@ -129,7 +156,7 @@ events.on('payment:changed', (item: HTMLButtonElement) => {
 	app.validateOrder();
 });
 
-events.on('formErrors:change', (errors: Partial<IOrderForm>) => {
+events.on('formErrors:change', (errors: Partial<IOrder>) => {
 	const { email, phone, address, payment } = errors;
 	order.valid = !address && !payment;
 	contacts.valid = !email && !phone;
@@ -142,11 +169,11 @@ events.on('formErrors:change', (errors: Partial<IOrderForm>) => {
 });
 
 events.on('order:submit', () => {
-	app.order.total = app.getTotal();
+	const contactsData = app.order;
 	modal.render({
 		content: contacts.render({
-			email: '',
-			phone: '',
+			email: contactsData.email,
+			phone: contactsData.email,
 			valid: false,
 			errors: [],
 		}),
@@ -155,27 +182,28 @@ events.on('order:submit', () => {
 
 events.on(
 	/^contacts\..*:change/,
-	(data: { field: keyof IOrderForm; value: string }) => {
+	(data: { field: keyof IOrder; value: string }) => {
 		app.setContactsField(data.field, data.value);
 	}
 );
 
 events.on(
 	/^order\..*:change/,
-	(data: { field: keyof IOrderForm; value: string }) => {
+	(data: { field: keyof IOrder; value: string }) => {
 		app.setOrderField(data.field, data.value);
 	}
 );
 
 events.on('contacts:submit', () => {
+	const orderWithTotal = {
+		...app.order,
+		total: app.getTotal(),
+		items: app.basket.map((item) => item.id),
+	};
 	api
-		.orderProducts(app.order)
+		.orderProducts(orderWithTotal)
 		.then(() => {
-			const success = new Success(cloneTemplate(successTemplate), {
-				onClick: () => {
-					modal.close();
-				},
-			});
+			success;
 			modal.render({
 				content: success.render({
 					total: app.getTotal(),
@@ -183,7 +211,6 @@ events.on('contacts:submit', () => {
 			});
 			app.clearOrder();
 			app.clearBasket();
-			page.counter = app.basket.length;
 		})
 		.catch((err) => {
 			console.error(err);

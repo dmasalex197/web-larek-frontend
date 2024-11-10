@@ -16,20 +16,18 @@ export interface ICard {
 	category: string;
 	image: string;
 	price: number | null;
+	index?: number;
+	button?: string;
 }
 
 // Интерфейс заказа
-export interface IOrderForm {
+export default interface IOrder {
 	payment: string;
 	email: string;
 	phone: string;
 	address: string;
-	total: string | number;
 }
 
-export interface IOrder extends IOrderForm {
-	items: string[];
-}
 
 type EventName = string | RegExp;
 
@@ -83,17 +81,17 @@ export interface IAppState {
 	loading: boolean;
 	setCatalog(catalog: ICardView[]): void;
 	setPreview(card: TPreviewCard): void;
-	getPreviewButton(card: ICardView): void;
-	addCardToBusket(card: TBasketCard): void;
+	addCardToBusket(card: ICard): void;
 	removeCardFromBusket(card: TBasketCard): void;
 	clearBasket(): void;
 	clearOrder(): void;
+	clearAddressAndPayment(): void;
 	getTotal(): number;
-	updateOrder(): void;
-	setOrderField(field: keyof IOrderForm, value: string): void;
-	setContactsField(field: keyof IOrderForm, value: string): void;
+	setOrderField(field: keyof IOrder, value: string): void;
+	setContactsField(field: keyof IOrder, value: string): void;
 	validateOrder(): boolean;
 	validateContacts(): boolean;
+	cardInBasket(card: ICard): boolean;
 }
 
 // Интерфейс Страницы
@@ -174,3 +172,7 @@ export enum Categories {
 export interface ISuccessActions {
 	onClick: () => void;
 }
+
+export interface IActions {
+	onClick: (event: MouseEvent) => void;
+  }

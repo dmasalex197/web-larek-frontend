@@ -68,8 +68,7 @@ interface IOrder {
     payment: Payment;
     email: string;
     phone: number;
-	adress: string;
-    total: number;
+	  adress: string;
 }
 ```
 ### Интерфейс Api
@@ -111,7 +110,6 @@ interface IAppState {
   basket: string[];
   preview: string | null;
   order: IOrder;
-  total: string | number;
   loading: boolean;
 }
 ```
@@ -123,17 +121,7 @@ interface IPage {
   locked: boolean;
 }
 ```
-### Интерфейс Карточки товара
-```ts
-interface ICardView {
-  id: string;
-  title: string;
-  category: string;
-  image: string;
-  price: number;
-  text: string;
-}
-```
+
 ### Интерфейс отображения товара в корзине
 ```ts
 interface ICardBasketView {
@@ -273,13 +261,13 @@ interface ICardsData = {
 
 - setCatalog - установить каталог товаров
 - setPreview- установить товар в просмотр
-- getPreviewButton - получение состояния кнопки
+<!-- - getPreviewButton - получение состояния кнопки -->
 - addCardToBusket - добавить товар в корзину
 - removeCardFromBusket - убрать товар из корзины
 - clearBasket - очистить данные корзины
 - clearOrder - очистить данные заказа
 - getTotal - получить сумму заказа
-- updateOrder - обновить данные заказа
+<!-- - updateOrder - обновить данные заказа -->
 - setOrderField - устанавливает данные в форму заказа
 - setContactsField - устанавливает данные в форму контактов
 - validateOrder - провести валидацию формы заказа
@@ -314,9 +302,9 @@ interface ICardsData = {
 - setIsLocked - отвечает за блокироку прокрутки страницы
 
 
-### Класс `CardView`
+### Класс `Card`
 
-Класс отвечает за отображение данных карточки товара в каталоге. Наследуется от базового абстрактного класс `Component<T>` (интерфейс `ICardView`).
+Класс отвечает за отображение данных карточки товара в каталоге. Наследуется от базового абстрактного класс `Component<T>` (интерфейс `ICard`).
 
 Поля:
 

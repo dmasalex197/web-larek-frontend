@@ -1,12 +1,4 @@
-import {
-	FormErrors,
-	IAppState,
-	ICard,
-	IOrder,
-	IOrderForm,
-	TBasketCard,
-	TPreviewCard,
-} from '../types';
+import IOrder, { FormErrors, IAppState, ICard, TBasketCard, TPreviewCard } from '../types';
 
 import { Model } from './base/Model';
 
@@ -19,8 +11,6 @@ export class AppState extends Model<IAppState> {
 		address: '',
 		email: '',
 		phone: '',
-		total: 0,
-		items: [],
 	};
 
 	protected formErrors: FormErrors = {};
@@ -35,25 +25,28 @@ export class AppState extends Model<IAppState> {
 		this.emitChanges('preview:changed', card);
 	}
 
-	getPreviewButton(card: ICard) {
-		if (card.price === null) {
-			return 'unavailable';
-		} else return 'addToBasket';
+	addCardToBasket(card: ICard) {
+		if (!this.cardInBasket(card)) {
+			this.basket.push(card);
+			this.emitChanges('basket:changed');
+		}
 	}
 
-	addCardToBasket(card: TBasketCard) {
-		this.basket.push(card);
+	cardInBasket(card: ICard) {
+		return this.basket.some(item => item.id == card.id);
 	}
 
 	removeCardFromBasket(card: TBasketCard) {
 		const index = this.basket.indexOf(card);
 		if (index >= 0) {
 			this.basket.splice(index, 1);
+			this.emitChanges('basket:changed');
 		}
 	}
 
 	clearBasket() {
 		this.basket = [];
+		this.emitChanges('basket:changed');
 	}
 
 	clearOrder() {
@@ -62,22 +55,22 @@ export class AppState extends Model<IAppState> {
 			address: '',
 			email: '',
 			phone: '',
-			total: 0,
-			items: [],
 		};
+	}
+
+	clearAddressAndPayment() {
+		this.order.address = '';
+		this.order.payment = '';
 	}
 
 	getTotal() {
 		return this.basket.reduce((total, item) => total + item.price, 0);
 	}
 
-	updateOrder() {
-		this.order.total = this.getTotal();
-		this.order.items = this.basket.map((item) => item.id);
-	}
+	setOrderField(field: keyof IOrder, value: string) {
 
-	setOrderField(field: keyof IOrderForm, value: string) {
 		this.order[field] = value;
+
 
 		if (this.validateOrder()) {
 			this.events.emit('order:ready', this.order);
@@ -98,9 +91,10 @@ export class AppState extends Model<IAppState> {
 		return Object.keys(errors).length === 0;
 	}
 
-	setContactsField(field: keyof IOrderForm, value: string) {
+	setContactsField(field: keyof IOrder, value: string) {
 		this.order[field] = value;
-
+		this.emitChanges('order:changed', this.order);
+		
 		if (this.validateContacts()) {
 			this.events.emit('order:ready', this.order);
 		}
