@@ -84,7 +84,6 @@ events.on('preview:changed', (item: ICardView) => {
 
 events.on('card:addToBasket', (item: ICard) => {
 	app.addCardToBasket(item);
-	page.counter = app.basket.length;
 	modal.close();
 });
 
@@ -92,21 +91,20 @@ events.on('basket:changed', () => {
 	page.counter = app.basket.length;
 	basket.render({
 		total: app.getTotal(),
+		list: app.basket.map((item, indexCard) => {
+			const basketCard = new CardViewNew(cloneTemplate(cardBasketTemplate), {
+				onClick: () => events.emit('card:removeFromBasket', item),
+			});
+			return basketCard.render({
+				title: item.title,
+				price: item.price,
+				index: indexCard + 1,
+			});
+		}),
 	});
 });
 
 events.on('basket:open', () => {
-	let indexCard = 1;
-	basket.list = app.basket.map((item) => {
-		const basketCard = new CardViewNew(cloneTemplate(cardBasketTemplate), {
-			onClick: () => events.emit('card:removeFromBasket', item),
-		});
-		return basketCard.render({
-			title: item.title,
-			price: item.price,
-			index: indexCard++,
-		});
-	});
 	modal.render({
 		content: basket.render(),
 	});
@@ -114,33 +112,32 @@ events.on('basket:open', () => {
 
 events.on('card:removeFromBasket', (item: ICard) => {
 	app.removeCardFromBasket(item);
-	page.counter = app.basket.length;
 	basket.total = app.getTotal();
-	let indexCard = 1;
-	basket.list = app.basket.map((item) => {
-		const card = new CardViewNew(cloneTemplate(cardBasketTemplate), {
-			onClick: () => events.emit('card:removeFromBasket', item),
-		});
-		return card.render({
-			title: item.title,
-			price: item.price,
-			index: indexCard++,
-		});
-	});
 });
 
 events.on('order:changed', () => {
+	const orderData = app.order;
 	order.render({
-		payment: '',
-		address: '',
+		payment: orderData.payment,
+		address: orderData.address,
+		valid: false,
+		errors: [],
+	});
+});
+
+events.on('contacts:changed', () => {
+	const orderData = app.order;
+	order.render({
+		payment: orderData.payment,
+		address: orderData.address,
 		valid: false,
 		errors: [],
 	});
 });
 
 events.on('order:open', () => {
-	const orderData = app.order;
 	app.clearAddressAndPayment();
+	const orderData = app.order;
 	modal.render({
 		content: order.render({
 			payment: orderData.payment,
@@ -149,11 +146,6 @@ events.on('order:open', () => {
 			errors: [],
 		}),
 	});
-});
-
-events.on('payment:changed', (item: HTMLButtonElement) => {
-	app.order.payment = item.name;
-	app.validateOrder();
 });
 
 events.on('formErrors:change', (errors: Partial<IOrder>) => {
@@ -203,7 +195,6 @@ events.on('contacts:submit', () => {
 	api
 		.orderProducts(orderWithTotal)
 		.then(() => {
-			success;
 			modal.render({
 				content: success.render({
 					total: app.getTotal(),

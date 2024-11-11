@@ -261,13 +261,11 @@ interface ICardsData = {
 
 - setCatalog - установить каталог товаров
 - setPreview- установить товар в просмотр
-<!-- - getPreviewButton - получение состояния кнопки -->
 - addCardToBusket - добавить товар в корзину
 - removeCardFromBusket - убрать товар из корзины
 - clearBasket - очистить данные корзины
 - clearOrder - очистить данные заказа
 - getTotal - получить сумму заказа
-<!-- - updateOrder - обновить данные заказа -->
 - setOrderField - устанавливает данные в форму заказа
 - setContactsField - устанавливает данные в форму контактов
 - validateOrder - провести валидацию формы заказа

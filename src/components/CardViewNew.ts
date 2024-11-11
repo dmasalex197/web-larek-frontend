@@ -1,4 +1,4 @@
-import { IActions, ICard } from '../types';
+import { Categories, IActions, ICard, TCategory } from '../types';
 import { ensureElement } from '../utils/utils';
 import { Component } from './base/Component';
 
@@ -49,5 +49,10 @@ export class CardViewNew extends Component<ICard> {
 
 	set image(value: string) {
 		this.setImage(this._image, value, this.title);
+	}
+
+	set category(value: TCategory) {
+		this._category.textContent = value;
+		this._category.classList.add(Categories[value]);
 	}
 }

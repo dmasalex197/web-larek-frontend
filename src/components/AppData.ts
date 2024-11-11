@@ -1,4 +1,10 @@
-import IOrder, { FormErrors, IAppState, ICard, TBasketCard, TPreviewCard } from '../types';
+import IOrder, {
+	FormErrors,
+	IAppState,
+	ICard,
+	TBasketCard,
+	TPreviewCard,
+} from '../types';
 
 import { Model } from './base/Model';
 
@@ -33,7 +39,7 @@ export class AppState extends Model<IAppState> {
 	}
 
 	cardInBasket(card: ICard) {
-		return this.basket.some(item => item.id == card.id);
+		return this.basket.some((item) => item.id == card.id);
 	}
 
 	removeCardFromBasket(card: TBasketCard) {
@@ -56,11 +62,13 @@ export class AppState extends Model<IAppState> {
 			email: '',
 			phone: '',
 		};
+		this.emitChanges('order:changed', this.order);
 	}
 
 	clearAddressAndPayment() {
 		this.order.address = '';
 		this.order.payment = '';
+		this.emitChanges('order:changed', this.order);
 	}
 
 	getTotal() {
@@ -68,18 +76,9 @@ export class AppState extends Model<IAppState> {
 	}
 
 	setOrderField(field: keyof IOrder, value: string) {
-
 		this.order[field] = value;
-
-
-		if (this.validateOrder()) {
-			this.events.emit('order:ready', this.order);
-		}
-	}
-
-	validateOrder() {
+		this.emitChanges('order:changed', this.order);
 		const errors: typeof this.formErrors = {};
-
 		if (!this.order.payment) {
 			errors.payment = 'Необходимо выбрать способ оплаты';
 		}
@@ -93,8 +92,7 @@ export class AppState extends Model<IAppState> {
 
 	setContactsField(field: keyof IOrder, value: string) {
 		this.order[field] = value;
-		this.emitChanges('order:changed', this.order);
-		
+		this.emitChanges('contacts:changed', this.order);
 		if (this.validateContacts()) {
 			this.events.emit('order:ready', this.order);
 		}
